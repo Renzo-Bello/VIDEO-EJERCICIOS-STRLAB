@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLAB — Ejercicios de Referencia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface2: #1e1e21;
+    --border: #2a2a2e;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f2f;
+    --gold-glow: rgba(201,168,76,0.12);
+    --text: #f0ede8;
+    --text-muted: #7a7a82;
+    --text-dim: #4a4a52;
+    --radius: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(14,14,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--gold);
+  }
+
+  .logo span {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    display: block;
+    margin-top: -4px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 8px 20px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    background: var(--gold);
+    color: #0e0e0f;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* CATEGORY SECTION */
+  .category { display: none; }
+  .category.active { display: block; }
+
+  .category-header {
+    margin-bottom: 32px;
+  }
+
+  .category-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .category-title span {
+    color: var(--gold);
+  }
+
+  .category-line {
+    width: 48px;
+    height: 2px;
+    background: var(--gold);
+    margin-top: 12px;
+  }
+
+  /* EXERCISE GRID */
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  /* EXERCISE CARD */
+  .exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .exercise-card:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-2px);
+  }
+
+  .exercise-card.expanded {
+    grid-column: 1 / -1;
+    border-color: var(--gold);
+  }
+
+  /* VIDEO AREA */
+  .video-wrapper {
+    position: relative;
+    background: #000;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .video-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+  }
+
+  .video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    gap: 10px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .video-placeholder:hover .upload-hint {
+    color: var(--gold);
+  }
+
+  .play-icon {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--gold-dim);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s;
+  }
+
+  .video-placeholder:hover .play-icon {
+    border-color: var(--gold);
+  }
+
+  .play-icon svg { fill: var(--gold); margin-left: 3px; }
+
+  .upload-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .file-input-hidden {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    padding: 16px;
+  }
+
+  .exercise-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+
+  .exercise-notes {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .notes-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--gold-dim);
+    cursor: pointer;
+    margin-top: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .notes-toggle:hover { color: var(--gold); }
+
+  .notes-content {
+    display: none;
+    margin-top: 8px;
+    padding: 10px;
+    background: var(--surface2);
+    border-left: 2px solid var(--gold-dim);
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .notes-content.open { display: block; }
+
+  /* REMOVE VIDEO */
+  .remove-video {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .remove-video:hover { color: #ff5555; border-color: #ff5555; }
+
+  /* VIDEO TAG */
+  .video-tag {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.75);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    .tabs { width: 100%; }
+    .tab { flex: 1; text-align: center; padding: 8px 10px; font-size: 11px; }
+    .exercise-grid { grid-template-columns: 1fr; }
+    .category-title { font-size: 32px; }
+    main { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    SLAB
+    <span>EJERCICIOS DE REFERENCIA</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showCategory('empuje')">Empuje</button>
+    <button class="tab" onclick="showCategory('jalon')">Jalón</button>
+    <button class="tab" onclick="showCategory('piernas')">Piernas</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== EMPUJE ===== -->
+  <div class="category active" id="cat-empuje">
+    <div class="category-header">
+      <div class="category-title">EMP<span>U</span>JE</div>
+      <div class="category-line"></div>
+    </div>
+    <div class="exercise-grid">
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-fondos">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'fondos')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-fondos">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Fondos en paralelas</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Codos hacia atrás, no afuera. Ligera inclinación del torso para mayor activación pectoral. Bajar hasta 90° o leve stretch, sin perder tensión escapular.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-pressplano">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'pressplano')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-pressplano">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Press plano con barra</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Retracción y depresión escapular antes de bajar. Barra baja al esternón bajo, no a la garganta. Pie firme en el piso. Empuje la barra hacia los pies al subir.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-pressinclinado">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'pressinclinado')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-pressinclinado">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Press inclinado con mancuernas</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Banco a 30–45°. Codos a ~75°, no perpendiculares al torso. Bajar controlado hasta stretch del pectoral. Apretar pecho en la fase concéntrica.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-peckdeck">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'peckdeck')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-peckdeck">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Peck deck / Aperturas en máquina</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Asiento ajustado para que los codos queden a altura pectoral. Énfasis en el estiramiento controlado. No dejar que los brazos colapsen hacia atrás. Apretar en el centro.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-pressmilitar">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'pressmilitar')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-pressmilitar">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Press militar con barra</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Core activo, sin hiperlordosis. Barra sale de la clavícula, no del pecho. Cabeza retrocede para dar paso a la barra. Lockout completo en arriba sin hiperextender codos.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-laterales">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'laterales')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-laterales">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Elevaciones laterales</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Codo ligeramente flexionado y fijo. Elevar hasta paralelo o leve por encima. No trapear — hombros abajo. Fase excéntrica lenta (3–4 seg). Codo lidera el movimiento, no la muñeca.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== JALÓN ===== -->
+  <div class="category" id="cat-jalon">
+    <div class="category-header">
+      <div class="category-title">JAL<span>Ó</span>N</div>
+      <div class="category-line"></div>
+    </div>
+    <div class="exercise-grid">
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-dominadas">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'dominadas')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-dominadas">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Dominadas</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Dead hang completo en el fondo. Retracción escapular antes de jalar. Pecho al bar, codos al bolsillo. Evitar kipping a menos que sea el objetivo. Agarre prono a ancho de hombros.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-jalonpecho">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'jalonpecho')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-jalonpecho">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Jalón al pecho</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Torso ligeramente inclinado hacia atrás (10–15°). Jalar hacia el esternón. Escápulas hacia abajo y atrás al final del recorrido. Codos apuntan al suelo, no hacia los lados.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-remounilateral">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'remounilateral')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-remounilateral">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Remo unilateral con mancuerna</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Espalda neutra, no rotar el torso para compensar. Codo al techo — no abrir hacia el lado. Inicio con depresión escapular. Exagerar el estiramiento del dorsal en la fase excéntrica.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-remobarra">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'remobarra')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-remobarra">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Remo con barra</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Cadera a 45°, rodillas suaves. Barra hacia el ombligo (no el pecho). Retracción escapular al final. No usar el impulso de la cadera para compensar el peso.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-pullover">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'pullover')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-pullover">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Pullover en polea</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Brazos casi extendidos durante todo el recorrido. Tirón desde el dorsal, no desde el codo. Buscar el estiramiento máximo al inicio. Apretar en la contracción final a altura de cadera.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-curlbiceps">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'curlbiceps')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-curlbiceps">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Curl de bíceps con mancuernas</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Codos fijos al costado del torso. Supinación activa en la subida. Bajar completamente para maximizar estiramiento. Sin balanceo de torso ni ayuda de hombros.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== PIERNAS ===== -->
+  <div class="category" id="cat-piernas">
+    <div class="category-header">
+      <div class="category-title">PIER<span>N</span>AS</div>
+      <div class="category-line"></div>
+    </div>
+    <div class="exercise-grid">
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-sentadilla">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'sentadilla')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-sentadilla">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Sentadilla con barra</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Barra sobre los trapecios (high bar) o deltoides posteriores (low bar). Rodillas siguen la dirección de los pies. Profundidad mínima: muslos paralelos. Core braced, no relajar lumbar en el fondo.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-prensa">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'prensa')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-prensa">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Prensa de piernas</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Pies a ancho de hombros, altura media de la plataforma. Bajar hasta 90° sin despegar la espalda baja del respaldo. No bloquear las rodillas en extensión completa. Pies altos = más glúteo/isquio.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-pmr">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'pmr')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-pmr">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Peso muerto rumano</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Bisagra de cadera, no sentadilla. Barra pegada al cuerpo en todo momento. Espalda neutra — no redondear. Bajar hasta sentir tensión en isquiotibiales, no hasta el piso. Rodillas levemente flexionadas.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-zancada">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'zancada')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-zancada">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Zancadas caminando</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Paso largo, torso recto. Rodilla trasera casi toca el suelo. Rodilla delantera no pasa la punta del pie en exceso. Empujar desde el talón delantero al subir.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-curl-femoral">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'curl-femoral')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-curl-femoral">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Curl femoral acostado</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Cadera fija en el pad. No levantar la pelvis al jalar. Contracción máxima en el punto final. Excéntrica controlada (3 seg) para mayor tensión en isquiotibiales.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-extension">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'extension')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-extension">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Extensión de cuádriceps</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Asiento ajustado: rodilla alineada con el pivote. Extensión completa con pausa en arriba. Excéntrica lenta para carga de cuádriceps. No balancear el torso.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-hipthrust">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'hipthrust')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-hipthrust">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Hip thrust</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Espalda alta apoyada en el banco a altura de escápulas. Chin tuck — no hiperextender cuello. Empujar talones al suelo. Pausa con contracción de glúteo en el tope. Rodillas a 90° al final del recorrido.</div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder" id="ph-gemelos">
+            <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></div>
+            <span class="upload-hint">Subir video MP4</span>
+            <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'gemelos')">
+          </div>
+          <span class="video-tag" style="display:none" id="tag-gemelos">MP4</span>
+        </div>
+        <div class="card-body">
+          <div class="exercise-name">Elevación de gemelos</div>
+          <button class="notes-toggle" onclick="toggleNotes(this)">▸ Cues técnicos</button>
+          <div class="notes-content">Rango completo: bajar el talón por debajo del escalón. Subida hasta máxima plantiflexión. Excéntrica lenta (3 seg). Rodillas ligeramente flexionadas para trabajar sóleo también.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>STRENGTHLAB · SLAB Reference v1.0</footer>
+
+<script>
+  // ===== VIDEOS DE YOUTUBE =====
+  // Pegá acá el link de YouTube de cada ejercicio (cualquier formato sirve:
+  // https://youtu.be/XXXXXXXXXXX  o  https://www.youtube.com/watch?v=XXXXXXXXXXX)
+  // Si dejás "" vacío, esa card sigue mostrando el uploader de MP4 como antes.
+  const YOUTUBE_LINKS = {
+    // EMPUJE
+    fondos: "",
+    pressplano: "",
+    pressinclinado: "",
+    peckdeck: "",
+    pressmilitar: "",
+    laterales: "",
+    // JALÓN
+    dominadas: "",
+    jalonpecho: "",
+    remounilateral: "",
+    remobarra: "",
+    pullover: "",
+    curlbiceps: "",
+    // PIERNA
+    sentadilla: "https://youtube.com/shorts/N5ti08ILFZ8?feature=share",
+    prensa: "",
+    pmr: "",
+    zancada: "",
+    "curl-femoral": "",
+    extension: "",
+    hipthrust: "",
+    gemelos: ""
+  };
+
+  function getYouTubeId(url) {
+    if (!url) return null;
+    url = url.trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url; // ya es un ID
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+  }
+
+  function embedYouTube(id, link) {
+    const vidId = getYouTubeId(link);
+    if (!vidId) return;
+    const ph = document.getElementById('ph-' + id);
+    if (!ph) return;
+    const wrapper = ph.parentElement;
+
+    ph.remove();
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${vidId}`;
+    iframe.title = 'Video del ejercicio';
+    iframe.loading = 'lazy';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    wrapper.prepend(iframe);
+
+    const tag = document.getElementById('tag-' + id);
+    if (tag) {
+      tag.textContent = 'YouTube';
+      tag.style.display = 'block';
+    }
+  }
+
+  function initYouTubeVideos() {
+    Object.keys(YOUTUBE_LINKS).forEach(id => embedYouTube(id, YOUTUBE_LINKS[id]));
+  }
+
+  function showCategory(cat) {
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('cat-' + cat).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function loadVideo(input, id) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const ph = document.getElementById('ph-' + id);
+    const tag = document.getElementById('tag-' + id);
+    const wrapper = ph.parentElement;
+
+    // Remove placeholder, add video
+    ph.remove();
+
+    const video = document.createElement('video');
+    video.src = url;
+    video.controls = true;
+    video.preload = 'metadata';
+    wrapper.prepend(video);
+
+    tag.style.display = 'block';
+
+    // Add remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-video';
+    removeBtn.textContent = '✕ Quitar';
+    removeBtn.onclick = () => removeVideo(wrapper, id, url);
+    wrapper.appendChild(removeBtn);
+  }
+
+  function removeVideo(wrapper, id, url) {
+    URL.revokeObjectURL(url);
+    const video = wrapper.querySelector('video');
+    const removeBtn = wrapper.querySelector('.remove-video');
+    const tag = document.getElementById('tag-' + id);
+
+    if (video) video.remove();
+    if (removeBtn) removeBtn.remove();
+    tag.style.display = 'none';
+
+    // Restore placeholder
+    const ph = document.createElement('div');
+    ph.className = 'video-placeholder';
+    ph.id = 'ph-' + id;
+    ph.innerHTML = `
+      <div class="play-icon"><svg width="14" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="var(--gold)"/></svg></div>
+      <span class="upload-hint">Subir video MP4</span>
+      <input type="file" accept="video/mp4,video/*" class="file-input-hidden" onchange="loadVideo(this,'${id}')">
+    `;
+    wrapper.prepend(ph);
+  }
+
+  function toggleNotes(btn) {
+    const notes = btn.nextElementSibling;
+    const open = notes.classList.toggle('open');
+    btn.textContent = (open ? '▾ ' : '▸ ') + 'Cues técnicos';
+  }
+
+  initYouTubeVideos();
+</script>
+
+</body>
+</html>
